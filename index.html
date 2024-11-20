@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consumindo API WordPress</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #content {
+            margin-top: 20px;
+        }
+        .produto {
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Produtos da API</h1>
+    <div id="content">Carregando...</div>
+       
+
+    <script>
+        // URL da API WordPress
+        const apiURL = "http://localhost/mywordpress/wp-json/wp/v2/todosprodutos";
+
+        // Função para consumir a API de produtos
+        async function fetchData() {
+            try {
+                // Consumindo a API de produtos com fetch
+                const response = await fetch(apiURL);
+                const data = await response.json();
+
+                // Selecionando o elemento para mostrar os dados
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = ''; // Limpar "Carregando..." antes de mostrar os dados
+
+                // Verificando se há dados
+                if (data && data.length > 0) {
+                    // Iterando sobre os produtos e exibindo
+                    data.forEach(produto => {
+                        const produtoDiv = document.createElement('div');
+                        produtoDiv.classList.add('produto');
+                        produtoDiv.innerHTML = `
+                            <h3>${produto.title.rendered}</h3>
+                            <p>${produto.acf.marca}</p>
+                            <p>${produto.acf.marca}</p>
+                        `;
+                        
+                        // Chama a função para pegar a imagem associada ao produto
+                        fetchImage(produto.acf.img).then(imagemUrl => {
+                            if (imagemUrl) {
+                                const imgElement = document.createElement('img');
+                                imgElement.src = imagemUrl;
+                                produtoDiv.appendChild(imgElement);
+
+                                const descricaoElement = document.createElement('p');
+                                descricaoElement.textContent = produto.acf.quantidade; // Exibe a descrição do produto
+                                produtoDiv.appendChild(descricaoElement);
+
+                            }
+                        });
+                        
+                        contentDiv.appendChild(produtoDiv);
+                    });
+                } else {
+                    contentDiv.innerHTML = '<p>Nenhum produto encontrado.</p>';
+                }
+            } catch (error) {
+                // Tratando erros
+                document.getElementById('content').innerHTML = '<p>Erro ao carregar os dados.</p>';
+                console.error('Erro ao consumir API:', error);
+            }
+        }
+
+        // Função para buscar a URL da imagem a partir do ID
+        async function fetchImage(imageId) {
+            try {
+                const imageResponse = await fetch(`http://localhost/mywordpress/wp-json/wp/v2/media/${imageId}`);
+                const imageData = await imageResponse.json();
+
+                // Retorna o link da imagem
+                return imageData.link; 
+            } catch (error) {
+                console.error('Erro ao carregar a imagem:', error);
+                return null;
+            }
+        }
+
+        // Chama a função para consumir a API de produtos
+        fetchData();
+    </script>
+
+</body>
+</html>
