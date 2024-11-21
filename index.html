@@ -12,13 +12,20 @@
             margin-top: 20px;
         }
         .produto {
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
             border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
         }
         img {
             max-width: 100%;
             height: auto;
+            display: block;
+            margin-bottom: 15px; /* Espaço entre a imagem e os textos seguintes */
+        }
+        .descricao {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -26,7 +33,6 @@
 
     <h1>Produtos da API</h1>
     <div id="content">Carregando...</div>
-       
 
     <script>
         // URL da API WordPress
@@ -51,24 +57,30 @@
                         produtoDiv.classList.add('produto');
                         produtoDiv.innerHTML = `
                             <h3>${produto.title.rendered}</h3>
-                            <p>${produto.acf.marca}</p>
-                            <p>${produto.acf.marca}</p>
+                            <p><strong>Marca:</strong> ${produto.acf.marca}</p>
                         `;
-                        
+
                         // Chama a função para pegar a imagem associada ao produto
                         fetchImage(produto.acf.img).then(imagemUrl => {
                             if (imagemUrl) {
                                 const imgElement = document.createElement('img');
                                 imgElement.src = imagemUrl;
-                                produtoDiv.appendChild(imgElement);
-
-                                const descricaoElement = document.createElement('p');
-                                descricaoElement.textContent = produto.acf.quantidade; // Exibe a descrição do produto
-                                produtoDiv.appendChild(descricaoElement);
-
+                                produtoDiv.appendChild(imgElement); // Adiciona a imagem ao produtoDiv
                             }
+                            
+                            // Adiciona a quantidade abaixo da imagem
+                            const quantidadeElement = document.createElement('p');
+                            quantidadeElement.classList.add('descricao');
+                            quantidadeElement.textContent = `Quantidade: ${produto.acf.quantidade || "Não especificada"}`;
+                            produtoDiv.appendChild(quantidadeElement);
+
+                            // Adiciona a descrição abaixo da quantidade
+                            const descricaoElement = document.createElement('p');
+                            descricaoElement.classList.add('descricao');
+                            descricaoElement.textContent = `Descrição: ${produto.acf.descricao || "Não disponível."}`;
+                            produtoDiv.appendChild(descricaoElement);
                         });
-                        
+
                         contentDiv.appendChild(produtoDiv);
                     });
                 } else {
